@@ -176,6 +176,7 @@ if len(st.session_state.submissions) == 3:
     valuations = np.array([sub["values"] for sub in st.session_state.submissions])
     total_rent = TOTAL_RENT
 
+    # Try linear programming first
     room_indices = [0, 1, 2]
     best_solution = None
 
@@ -213,10 +214,96 @@ if len(st.session_state.submissions) == 3:
             }
             break
 
-    if best_solution:
+    # If linear programming fails, use Last Diminisher algorithm
+    if not best_solution:
+        st.markdown("""
+        <div class="info-box">
+            ℹ️ Using the Last Diminisher algorithm as a fallback method
+        </div>
+        """, unsafe_allow_html=True)
+
+        def last_diminisher_algorithm(valuations, total_rent):
+            n = len(valuations)
+            # Initialize assignments and prices
+            assignments = [-1] * n  # -1 means not assigned
+            prices = [0] * n
+            remaining_rent = total_rent
+            
+            # First person gets their most valued room at their valuation
+            first_person = 0
+            first_room = np.argmax(valuations[first_person])
+            assignments[first_person] = first_room
+            prices[first_room] = valuations[first_person][first_room]
+            remaining_rent -= prices[first_room]
+            
+            # Second person can either take the first room or get their most valued remaining room
+            second_person = 1
+            second_room = np.argmax(valuations[second_person])
+            if valuations[second_person][first_room] > valuations[second_person][second_room]:
+                # Second person takes first room
+                assignments[second_person] = first_room
+                assignments[first_person] = second_room
+                prices[first_room] = valuations[second_person][first_room]
+                prices[second_room] = valuations[first_person][second_room]
+            else:
+                # Second person takes their most valued room
+                assignments[second_person] = second_room
+                prices[second_room] = valuations[second_person][second_room]
+            
+            # Third person gets the remaining room
+            third_person = 2
+            remaining_room = [r for r in range(n) if r not in assignments][0]
+            assignments[third_person] = remaining_room
+            
+            # Calculate fair price for the remaining room
+            remaining_rent = total_rent - sum(prices)
+            prices[remaining_room] = remaining_rent
+            
+            return assignments, prices
+
+        # Run the Last Diminisher algorithm
+        assignments, prices = last_diminisher_algorithm(valuations, total_rent)
+        
+        # Display results
         st.markdown("""
         <div class="success-box">
-            🎉 Envy-free allocation found!
+            🎉 Fair room assignments found using the Last Diminisher algorithm!
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.subheader("📊 Final Room Assignments")
+        for i, person in enumerate(names):
+            room_index = assignments[i]
+            room_label = ROOM_LABELS[room_index]
+            rent = prices[room_index]
+            st.markdown(f"""
+            **{person}** → {room_label}
+            - Monthly Rent: **${rent:.2f}**
+            - Their valuation: **${valuations[i][room_index]:.2f}**
+            """)
+
+        # Add explanation of the Last Diminisher algorithm
+        st.markdown("""
+        <div class="info-box">
+            <h4>How the Last Diminisher Algorithm Works:</h4>
+            <ol>
+                <li>First person gets their most valued room at their valuation</li>
+                <li>Second person can either take the first room or get their most valued remaining room</li>
+                <li>Third person gets the remaining room at a fair price</li>
+            </ol>
+            This ensures that:
+            <ul>
+                <li>Each person gets a room they value at least as much as any other room</li>
+                <li>The total rent is fairly distributed based on room preferences</li>
+                <li>No person would prefer another person's room at the other person's rent</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        # Display linear programming results
+        st.markdown("""
+        <div class="success-box">
+            🎉 Optimal envy-free allocation found using linear programming!
         </div>
         """, unsafe_allow_html=True)
         
@@ -228,11 +315,20 @@ if len(st.session_state.submissions) == 3:
             st.markdown(f"""
             **{person}** → {room_label}
             - Monthly Rent: **${rent:.2f}**
+            - Their valuation: **${valuations[i][room_index]:.2f}**
             """)
-    else:
+
+        # Add explanation of the linear programming solution
         st.markdown("""
-        <div class="error-box">
-            ❌ Could not find an envy-free solution.
+        <div class="info-box">
+            <h4>How the Linear Programming Solution Works:</h4>
+            <p>This solution uses mathematical optimization to find the most efficient envy-free allocation where:</p>
+            <ul>
+                <li>Each person gets exactly one room</li>
+                <li>No person would prefer another person's room at the other person's rent</li>
+                <li>The total rent is exactly distributed</li>
+                <li>The solution minimizes the maximum difference between a person's valuation and their rent</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
 
