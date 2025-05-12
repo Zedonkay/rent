@@ -5,6 +5,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsSection = document.getElementById('results');
     const resetButton = document.getElementById('resetButton');
     const currentSubmissions = document.getElementById('currentSubmissions');
+    const TOTAL_RENT = 2380;
+
+    // Initialize room values
+    const roomInputs = {
+        room1: document.getElementById('room1'),
+        room2: document.getElementById('room2'),
+        room3: document.getElementById('room3')
+    };
+
+    // Set initial values
+    Object.values(roomInputs).forEach(input => {
+        input.value = (TOTAL_RENT / 3).toFixed(2);
+    });
+
+    // Function to calculate remaining values
+    function updateRemainingValues(changedInput) {
+        const filledInputs = Object.entries(roomInputs)
+            .filter(([_, input]) => input.value && input !== changedInput)
+            .map(([_, input]) => parseFloat(input.value));
+
+        const remainingInputs = Object.entries(roomInputs)
+            .filter(([_, input]) => !input.value || input === changedInput)
+            .map(([_, input]) => input);
+
+        if (filledInputs.length === 0) {
+            // If no values are filled, set all to equal
+            Object.values(roomInputs).forEach(input => {
+                input.value = (TOTAL_RENT / 3).toFixed(2);
+            });
+        } else if (filledInputs.length === 1) {
+            // If one value is filled, split remaining equally
+            const remaining = TOTAL_RENT - filledInputs[0];
+            remainingInputs.forEach(input => {
+                input.value = (remaining / 2).toFixed(2);
+            });
+        } else if (filledInputs.length === 2) {
+            // If two values are filled, set last to remaining
+            const remaining = TOTAL_RENT - filledInputs.reduce((a, b) => a + b, 0);
+            remainingInputs[0].value = remaining.toFixed(2);
+        }
+    }
+
+    // Add event listeners for input changes
+    Object.values(roomInputs).forEach(input => {
+        input.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value) || 0;
+            if (value < 0) {
+                e.target.value = 0;
+            }
+            updateRemainingValues(e.target);
+        });
+
+        input.addEventListener('focus', (e) => {
+            e.target.select();
+        });
+    });
 
     // Update progress bar and check submissions
     async function updateProgress() {
@@ -40,11 +96,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(form);
         const data = {
             name: formData.get('name'),
-            valuations: {
-                'Room A': parseFloat(formData.get('roomA')),
-                'Room B': parseFloat(formData.get('roomB')),
-                'Room C': parseFloat(formData.get('roomC'))
-            }
+            values: [
+                parseFloat(formData.get('room1')),
+                parseFloat(formData.get('room2')),
+                parseFloat(formData.get('room3'))
+            ]
         };
 
         try {
@@ -60,6 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (result.success) {
                 form.reset();
+                // Reset room values to initial state
+                Object.values(roomInputs).forEach(input => {
+                    input.value = (TOTAL_RENT / 3).toFixed(2);
+                });
                 updateProgress();
             } else {
                 alert(result.error || 'Error submitting valuations');
