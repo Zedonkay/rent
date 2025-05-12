@@ -35,12 +35,24 @@ st.markdown("""
         padding: 1rem;
         border-radius: 5px;
         margin: 1rem 0;
+        color: #1b5e20;
+        border: 1px solid #a5d6a7;
     }
     .error-box {
         background-color: #ffebee;
         padding: 1rem;
         border-radius: 5px;
         margin: 1rem 0;
+        color: #b71c1c;
+        border: 1px solid #ef9a9a;
+    }
+    .info-box {
+        background-color: #e3f2fd;
+        padding: 1rem;
+        border-radius: 5px;
+        margin: 1rem 0;
+        color: #0d47a1;
+        border: 1px solid #90caf9;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -59,13 +71,16 @@ TOTAL_RENT = 2380
 
 # Data storage functions
 def load_submissions():
-    if os.path.exists('submissions.json'):
-        with open('submissions.json', 'r') as f:
+    data_file = 'data/submissions.json'
+    if os.path.exists(data_file):
+        with open(data_file, 'r') as f:
             return json.load(f)
     return []
 
 def save_submissions(submissions):
-    with open('submissions.json', 'w') as f:
+    data_file = 'data/submissions.json'
+    os.makedirs('data', exist_ok=True)
+    with open(data_file, 'w') as f:
         json.dump(submissions, f, indent=2)
 
 def get_user_submission(submissions, name):
@@ -150,7 +165,7 @@ if current_user:
 # Show submission count
 submission_count = len(st.session_state.submissions)
 st.markdown(f"""
-<div class="success-box">
+<div class="info-box">
     👥 {submission_count}/3 people have submitted their valuations
 </div>
 """, unsafe_allow_html=True)

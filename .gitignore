@@ -23,4 +23,5 @@ venv.bak/
 Thumbs.db
 
 # Application specific
-submissions.json 
+submissions.json
+!data/submissions.json 
