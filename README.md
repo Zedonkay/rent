@@ -1,57 +1,93 @@
-# Fair Rent Split Tool
+# 🏠 Fair Rent Split Tool
 
-A Streamlit application that helps three roommates find an envy-free rent split. The tool uses linear programming to ensure that each person gets their preferred room at a fair price.
+A modern web application that helps three roommates find an envy-free rent split using advanced fair division algorithms. The tool ensures that each person gets a room they value at least as much as any other room, while maintaining the total rent constraint.
 
-## Features
+## ✨ Features
 
-- Input personal valuations for each room
-- Automatic calculation of envy-free room assignments
-- Fair rent distribution based on room preferences
-- Clean and intuitive user interface
-- Real-time feedback and validation
+- **Modern UI/UX**: Clean, responsive design with smooth animations and intuitive interface
+- **Two-Step Solution**:
+  1. Linear Programming: Attempts to find the most efficient envy-free allocation
+  2. Last Diminisher Algorithm: Fallback method that guarantees a fair solution
+- **Real-time Progress Tracking**: Visual feedback on submission status
+- **Privacy-Focused**: Submissions are only revealed after all three participants have submitted
+- **Detailed Explanations**: Clear breakdown of the method used and each person's valuation
+- **Mobile Responsive**: Works seamlessly on all devices
 
-## Installation
+## 🚀 Getting Started
 
-1. Clone this repository:
-```bash
-git clone https://github.com/yourusername/fair-rent-split.git
-cd fair-rent-split
-```
+### Prerequisites
 
-2. Create a virtual environment and activate it:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
-```
+- Python 3.8 or higher
+- pip (Python package manager)
 
-3. Install the required packages:
-```bash
-pip install -r requirements.txt
-```
+### Installation
 
-## Usage
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/rent-split.git
+   cd rent-split
+   ```
 
-1. Run the Streamlit app:
-```bash
-streamlit run app.py
-```
+2. Create a virtual environment (recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-2. Open your web browser and navigate to the URL shown in the terminal (usually http://localhost:8501)
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. Each roommate should:
-   - Enter their name
-   - Assign their personal value to each room (total must equal the rent)
-   - Submit their valuations
+4. Run the application:
+   ```bash
+   python app.py
+   ```
 
-4. Once all three roommates have submitted their valuations, the app will automatically calculate and display the envy-free room assignments and rent splits.
+5. Open your browser and navigate to `http://localhost:5000`
 
-## How It Works
+## 🎯 How It Works
 
-The application uses linear programming to find an envy-free solution where:
-- Each person gets assigned to exactly one room
-- No person would prefer another person's room at the other person's rent
-- The total rent is distributed fairly based on room preferences
+1. **Submission Phase**:
+   - Each roommate enters their name and valuations for all three rooms
+   - The total of valuations must equal the total rent
+   - Submissions are kept private until all three have submitted
 
-## License
+2. **Calculation Phase**:
+   - The system first attempts to find an optimal solution using linear programming
+   - If no solution is found, it falls back to the Last Diminisher algorithm
+   - Results show each person's assigned room, their valuation, and the rent they'll pay
 
-MIT License 
+3. **Results**:
+   - Clear explanation of the method used
+   - Detailed breakdown of assignments and valuations
+   - Option to start a new round
+
+## 🛠️ Technical Details
+
+- **Frontend**: HTML5, CSS3, JavaScript (with Tailwind CSS for styling)
+- **Backend**: Python (Flask)
+- **Algorithms**:
+  - Linear Programming (using SciPy)
+  - Last Diminisher Algorithm
+- **Data Storage**: JSON file-based storage
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📧 Contact
+
+Your Name - [@yourtwitter](https://twitter.com/yourtwitter) - email@example.com
+
+Project Link: [https://github.com/yourusername/rent-split](https://github.com/yourusername/rent-split) 
