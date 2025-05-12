@@ -68,9 +68,17 @@ def save_submissions(submissions):
     with open('submissions.json', 'w') as f:
         json.dump(submissions, f, indent=2)
 
+def get_user_submission(submissions, name):
+    for sub in submissions:
+        if sub['name'].lower() == name.lower():
+            return sub
+    return None
+
 # Initialize session state
 if "submissions" not in st.session_state:
     st.session_state.submissions = load_submissions()
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
 
 # Input form
 with st.form("valuation_form"):
@@ -88,37 +96,64 @@ with st.form("valuation_form"):
     submitted = st.form_submit_button("Submit Valuations")
 
     if submitted:
-        total = val1 + val2 + val3
-        if abs(total - TOTAL_RENT) > 1e-3:
-            st.markdown(f"""
+        if not name:
+            st.markdown("""
             <div class="error-box">
-                ❌ Please make sure your total valuation sums to ${TOTAL_RENT}
+                ❌ Please enter your name
             </div>
             """, unsafe_allow_html=True)
         else:
-            submission = {
-                "name": name,
-                "values": [val1, val2, val3],
-                "timestamp": datetime.now().isoformat()
-            }
-            st.session_state.submissions.append(submission)
-            save_submissions(st.session_state.submissions)
-            st.markdown(f"""
-            <div class="success-box">
-                ✅ Thanks {name}! Your valuations have been recorded.
-            </div>
-            """, unsafe_allow_html=True)
+            total = val1 + val2 + val3
+            if abs(total - TOTAL_RENT) > 1e-3:
+                st.markdown(f"""
+                <div class="error-box">
+                    ❌ Please make sure your total valuation sums to ${TOTAL_RENT}
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                # Check if user has already submitted
+                existing_submission = get_user_submission(st.session_state.submissions, name)
+                if existing_submission:
+                    st.markdown(f"""
+                    <div class="error-box">
+                        ❌ You have already submitted your valuations. Please wait for others to submit.
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    submission = {
+                        "name": name,
+                        "values": [val1, val2, val3],
+                        "timestamp": datetime.now().isoformat()
+                    }
+                    st.session_state.submissions.append(submission)
+                    st.session_state.current_user = name
+                    save_submissions(st.session_state.submissions)
+                    st.markdown(f"""
+                    <div class="success-box">
+                        ✅ Thanks {name}! Your valuations have been recorded.
+                    </div>
+                    """, unsafe_allow_html=True)
 
-# Display submissions
-if st.session_state.submissions:
-    st.subheader("👥 Submitted Valuations")
-    for sub in st.session_state.submissions:
+# Display current user's submission
+current_user = st.session_state.current_user
+if current_user:
+    user_submission = get_user_submission(st.session_state.submissions, current_user)
+    if user_submission:
+        st.subheader("📝 Your Submission")
         st.markdown(f"""
-        **{sub['name']}**'s valuations (submitted at {datetime.fromisoformat(sub['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}):
-        - {ROOM_LABELS[0]}: ${sub['values'][0]:.2f}
-        - {ROOM_LABELS[1]}: ${sub['values'][1]:.2f}
-        - {ROOM_LABELS[2]}: ${sub['values'][2]:.2f}
+        **Your valuations** (submitted at {datetime.fromisoformat(user_submission['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}):
+        - {ROOM_LABELS[0]}: ${user_submission['values'][0]:.2f}
+        - {ROOM_LABELS[1]}: ${user_submission['values'][1]:.2f}
+        - {ROOM_LABELS[2]}: ${user_submission['values'][2]:.2f}
         """)
+
+# Show submission count
+submission_count = len(st.session_state.submissions)
+st.markdown(f"""
+<div class="success-box">
+    👥 {submission_count}/3 people have submitted their valuations
+</div>
+""", unsafe_allow_html=True)
 
 # Envy-free allocation once 3 submissions received
 if len(st.session_state.submissions) == 3:
@@ -186,8 +221,10 @@ if len(st.session_state.submissions) == 3:
         </div>
         """, unsafe_allow_html=True)
 
-# Reset button
-if st.button("🔄 Reset All Submissions"):
-    st.session_state.submissions = []
-    save_submissions([])
-    st.experimental_rerun()
+# Reset button (only show if all submissions are in)
+if len(st.session_state.submissions) == 3:
+    if st.button("🔄 Start New Round"):
+        st.session_state.submissions = []
+        st.session_state.current_user = None
+        save_submissions([])
+        st.experimental_rerun()
