@@ -2,6 +2,9 @@ import streamlit as st
 import numpy as np
 import itertools
 from scipy.optimize import linprog
+import json
+import os
+from datetime import datetime
 
 # Set page config
 st.set_page_config(
@@ -54,9 +57,20 @@ This tool helps three roommates find an envy-free rent split. Each person should
 ROOM_LABELS = ["Backyard Window Room", "Small Room", "Middle Room"]
 TOTAL_RENT = 2380
 
+# Data storage functions
+def load_submissions():
+    if os.path.exists('submissions.json'):
+        with open('submissions.json', 'r') as f:
+            return json.load(f)
+    return []
+
+def save_submissions(submissions):
+    with open('submissions.json', 'w') as f:
+        json.dump(submissions, f, indent=2)
+
 # Initialize session state
 if "submissions" not in st.session_state:
-    st.session_state.submissions = []
+    st.session_state.submissions = load_submissions()
 
 # Input form
 with st.form("valuation_form"):
@@ -82,10 +96,13 @@ with st.form("valuation_form"):
             </div>
             """, unsafe_allow_html=True)
         else:
-            st.session_state.submissions.append({
+            submission = {
                 "name": name,
-                "values": [val1, val2, val3]
-            })
+                "values": [val1, val2, val3],
+                "timestamp": datetime.now().isoformat()
+            }
+            st.session_state.submissions.append(submission)
+            save_submissions(st.session_state.submissions)
             st.markdown(f"""
             <div class="success-box">
                 ✅ Thanks {name}! Your valuations have been recorded.
@@ -97,7 +114,7 @@ if st.session_state.submissions:
     st.subheader("👥 Submitted Valuations")
     for sub in st.session_state.submissions:
         st.markdown(f"""
-        **{sub['name']}**'s valuations:
+        **{sub['name']}**'s valuations (submitted at {datetime.fromisoformat(sub['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}):
         - {ROOM_LABELS[0]}: ${sub['values'][0]:.2f}
         - {ROOM_LABELS[1]}: ${sub['values'][1]:.2f}
         - {ROOM_LABELS[2]}: ${sub['values'][2]:.2f}
@@ -172,4 +189,5 @@ if len(st.session_state.submissions) == 3:
 # Reset button
 if st.button("🔄 Reset All Submissions"):
     st.session_state.submissions = []
+    save_submissions([])
     st.experimental_rerun()
