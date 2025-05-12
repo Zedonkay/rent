@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 import numpy as np
 import itertools
 from scipy.optimize import linprog
@@ -6,23 +6,21 @@ import json
 import os
 from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 
 ROOM_LABELS = ["Backyard Window Room", "Small Room", "Middle Room"]
 TOTAL_RENT = 2380
 
 # Data storage functions
 def load_submissions():
-    data_file = 'data/submissions.json'
+    data_file = 'submissions.json'
     if os.path.exists(data_file):
         with open(data_file, 'r') as f:
             return json.load(f)
     return []
 
 def save_submissions(submissions):
-    data_file = 'data/submissions.json'
-    os.makedirs('data', exist_ok=True)
-    with open(data_file, 'w') as f:
+    with open('submissions.json', 'w') as f:
         json.dump(submissions, f, indent=2)
 
 def get_user_submission(submissions, name):
@@ -106,7 +104,15 @@ def last_diminisher_algorithm(valuations, total_rent):
 
 @app.route('/')
 def index():
-    return render_template('index.html', room_labels=ROOM_LABELS, total_rent=TOTAL_RENT)
+    return send_from_directory('.', 'index.html')
+
+@app.route('/style.css')
+def style():
+    return send_from_directory('.', 'style.css')
+
+@app.route('/main.js')
+def script():
+    return send_from_directory('.', 'main.js')
 
 @app.route('/api/submit', methods=['POST'])
 def submit_valuation():
