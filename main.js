@@ -14,11 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
         room3: document.getElementById('room3')
     };
 
-    // Set initial values
-    Object.values(roomInputs).forEach(input => {
-        input.value = (TOTAL_RENT / 3).toFixed(2);
-    });
-
     // Function to calculate remaining values
     function updateRemainingValues(changedInput) {
         const filledInputs = Object.entries(roomInputs)
@@ -61,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.select();
         });
     });
+
+    // Initialize values on page load
+    updateRemainingValues(null);
 
     // Update progress bar and check submissions
     async function updateProgress() {
@@ -117,9 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 form.reset();
                 // Reset room values to initial state
-                Object.values(roomInputs).forEach(input => {
-                    input.value = (TOTAL_RENT / 3).toFixed(2);
-                });
+                updateRemainingValues(null);
                 updateProgress();
             } else {
                 alert(result.error || 'Error submitting valuations');
