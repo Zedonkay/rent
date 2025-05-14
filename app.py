@@ -142,7 +142,7 @@ def submit_valuation():
     submissions.append(submission)
     save_submissions(submissions)
     
-    return jsonify({'message': 'Submission successful'})
+    return jsonify({'success': True, 'message': 'Submission successful'})
 
 @app.route('/api/submissions', methods=['GET'])
 def get_submissions():
@@ -162,22 +162,38 @@ def calculate_assignments():
     solution = linear_programming_solution(valuations, TOTAL_RENT)
     
     if solution:
+        assignments = []
+        for i, room_idx in enumerate(solution['assignment']):
+            assignments.append({
+                'person': names[i],
+                'room': ROOM_LABELS[room_idx],
+                'valuation': float(valuations[i][room_idx]),
+                'rent': float(solution['prices'][room_idx])
+            })
+        
         result = {
+            'success': True,
             'method': 'linear_programming',
-            'assignments': solution['assignment'],
-            'prices': solution['prices'],
-            'names': names,
-            'valuations': valuations.tolist()
+            'assignments': assignments,
+            'explanation': 'Using linear programming to find an envy-free solution that maximizes fairness.'
         }
     else:
         # Fall back to Last Diminisher
         assignments, prices = last_diminisher_algorithm(valuations, TOTAL_RENT)
+        assignments_list = []
+        for i, room_idx in enumerate(assignments):
+            assignments_list.append({
+                'person': names[i],
+                'room': ROOM_LABELS[room_idx],
+                'valuation': float(valuations[i][room_idx]),
+                'rent': float(prices[room_idx])
+            })
+        
         result = {
+            'success': True,
             'method': 'last_diminisher',
-            'assignments': assignments,
-            'prices': prices,
-            'names': names,
-            'valuations': valuations.tolist()
+            'assignments': assignments_list,
+            'explanation': 'Using the Last Diminisher algorithm to find a fair division of rooms.'
         }
     
     return jsonify(result)
