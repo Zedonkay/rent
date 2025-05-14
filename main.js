@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             
-            if (response.ok && (result.success || result.message)) {
+            if (response.ok) {
                 form.reset();
                 // Reset room values
                 Object.values(roomInputs).forEach(room => {
