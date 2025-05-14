@@ -147,7 +147,10 @@ def submit_valuation():
 @app.route('/api/submissions', methods=['GET'])
 def get_submissions():
     submissions = load_submissions()
-    return jsonify(submissions)
+    return jsonify({
+        'success': True,
+        'submissions': submissions
+    })
 
 @app.route('/api/calculate', methods=['GET'])
 def calculate_assignments():

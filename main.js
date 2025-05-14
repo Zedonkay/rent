@@ -115,22 +115,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/submissions');
             const data = await response.json();
             
-            const count = Array.isArray(data) ? data.length : 0;
-            progressBar.style.width = `${(count / 3) * 100}%`;
-            document.getElementById('submissionCount').textContent = `${count}/3`;
-            
-            if (count > 0) {
-                currentSubmissions.classList.remove('hidden');
-                submissionsList.innerHTML = data.map(sub => `
-                    <div class="room-card fade-in">
-                        <p class="font-semibold">${sub.name}</p>
-                        <p class="text-sm text-gray-600">Submitted ${new Date(sub.timestamp).toLocaleString()}</p>
-                    </div>
-                `).join('');
-            }
+            if (response.ok && data.success) {
+                const count = data.submissions.length;
+                progressBar.style.width = `${(count / 3) * 100}%`;
+                document.getElementById('submissionCount').textContent = `${count}/3`;
+                
+                if (count > 0) {
+                    currentSubmissions.classList.remove('hidden');
+                    submissionsList.innerHTML = data.submissions.map(sub => `
+                        <div class="room-card fade-in">
+                            <p class="font-semibold">${sub.name}</p>
+                            <p class="text-sm text-gray-600">Submitted ${new Date(sub.timestamp).toLocaleString()}</p>
+                        </div>
+                    `).join('');
+                }
 
-            if (count === 3) {
-                calculateAssignments();
+                if (count === 3) {
+                    calculateAssignments();
+                }
             }
         } catch (error) {
             console.error('Error updating progress:', error);
