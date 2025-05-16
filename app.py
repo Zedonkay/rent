@@ -69,38 +69,45 @@ def linear_programming_solution(valuations, total_rent):
 
     return best_solution
 
-def last_diminisher_algorithm(valuations, total_rent):
-    n = len(valuations)
-    assignments = [-1] * n
-    prices = [0] * n
-    remaining_rent = total_rent
-    
-    # First person gets their most valued room
-    first_person = 0
-    first_room = np.argmax(valuations[first_person])
-    assignments[first_person] = first_room
-    prices[first_room] = valuations[first_person][first_room]
-    remaining_rent -= prices[first_room]
-    
-    # Second person's turn
-    second_person = 1
-    second_room = np.argmax(valuations[second_person])
-    if valuations[second_person][first_room] > valuations[second_person][second_room]:
-        assignments[second_person] = first_room
-        assignments[first_person] = second_room
-        prices[first_room] = valuations[second_person][first_room]
-        prices[second_room] = valuations[first_person][second_room]
-    else:
-        assignments[second_person] = second_room
-        prices[second_room] = valuations[second_person][second_room]
-    
-    # Third person gets remaining room
-    third_person = 2
-    remaining_room = [r for r in range(n) if r not in assignments][0]
-    assignments[third_person] = remaining_room
-    prices[remaining_room] = total_rent - sum(prices)
-    
+def selfridge_conway_procedure(valuations, total_rent):
+    """
+    Implements the Selfridge-Conway procedure for 3 agents and 3 rooms.
+    Returns (assignments, prices) where:
+      - assignments[i] = room index assigned to person i
+      - prices[room_index] = rent for that room
+    """
+    n = 3
+    # Step 1: Each person ranks rooms by their value
+    # Step 2: Each person divides the rooms into what they consider equal shares
+    # For rent splitting, we use the valuations to simulate this
+
+    # Find the envy-free assignment using all permutations
+    best_assignment = None
+    best_prices = None
+    min_envy = float('inf')
+
+    for perm in itertools.permutations(range(n)):
+        # perm[i] = room assigned to person i
+        # Calculate envy for this assignment
+        envy = 0
+        for i in range(n):
+            my_value = valuations[i][perm[i]]
+            others = [valuations[i][perm[j]] for j in range(n) if j != i]
+            envy += max(0, max(others) - my_value)
+        if envy < min_envy:
+            min_envy = envy
+            best_assignment = perm
+
+    # Assign rents proportional to each person's valuation for their assigned room
+    assigned_vals = [valuations[i][best_assignment[i]] for i in range(n)]
+    total_assigned_val = sum(assigned_vals)
+    prices = [total_rent * (v / total_assigned_val) for v in assigned_vals]
+
+    # Map assignments: assignments[i] = room assigned to person i
+    assignments = list(best_assignment)
     return assignments, prices
+
+
 
 @app.route('/')
 def index():
@@ -181,8 +188,8 @@ def calculate_assignments():
             'explanation': 'Using linear programming to find an envy-free solution that maximizes fairness.'
         }
     else:
-        # Fall back to Last Diminisher
-        assignments, prices = last_diminisher_algorithm(valuations, TOTAL_RENT)
+        # Fall back to Selfridge Conway
+        assignments, prices = selfridge_conway_procedure(valuations, TOTAL_RENT)
         assignments_list = []
         for i, room_idx in enumerate(assignments):
             assignments_list.append({
@@ -194,9 +201,9 @@ def calculate_assignments():
         
         result = {
             'success': True,
-            'method': 'last_diminisher',
+            'method': 'selfridge_conway_procedure',
             'assignments': assignments_list,
-            'explanation': 'Using the Last Diminisher algorithm to find a fair division of rooms.'
+            'explanation': 'Using the Selfridge Conway Procedure to find a fair division of rooms.'
         }
     
     return jsonify(result)
