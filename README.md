@@ -1,8 +1,8 @@
-# 🏠 Fair Rent Split Tool
+# Fair Rent Split Tool
 
 A modern web application that helps three roommates find an envy-free rent split using advanced fair division algorithms. The tool ensures that each person gets a room they value at least as much as any other room, while maintaining the total rent constraint.
 
-## ✨ Features
+## Features
 
 - **Modern UI/UX**: Clean, responsive design with smooth animations and intuitive interface
 - **Two-Step Solution**:
@@ -13,7 +13,7 @@ A modern web application that helps three roommates find an envy-free rent split
 - **Detailed Explanations**: Clear breakdown of the method used and each person's valuation
 - **Mobile Responsive**: Works seamlessly on all devices
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -46,7 +46,7 @@ A modern web application that helps three roommates find an envy-free rent split
 
 5. Open your browser and navigate to `http://localhost:5000`
 
-## 🎯 How It Works
+## How It Works
 
 1. **Submission Phase**:
     - Each roommate enters their name and valuations for all three rooms
@@ -63,7 +63,7 @@ A modern web application that helps three roommates find an envy-free rent split
     - Detailed breakdown of assignments and valuations
     - Option to start a new round
 
-## 🛠️ Technical Details
+## Technical Details
 
 - **Frontend**: HTML5, CSS3, JavaScript (with Tailwind CSS for styling)
 - **Backend**: Python (Flask)
@@ -71,23 +71,3 @@ A modern web application that helps three roommates find an envy-free rent split
    - Linear Programming (using SciPy)
    - Selfridge-Conway Algorithm
 - **Data Storage**: JSON file-based storage
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📧 Contact
-
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter) - email@example.com
-
-Project Link: [https://github.com/yourusername/rent-split](https://github.com/yourusername/rent-split) 
